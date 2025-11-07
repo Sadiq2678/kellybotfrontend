@@ -30,7 +30,7 @@ export default function App() {
     // Use proxy in development, direct URL in production
     const apiUrl = window.location.hostname === 'localhost' 
       ? "/api/ask" 
-      : "https://kellybot-sdjn.onrender.com/ask";
+      : "https://kellybackbot.onrender.com/ask";
 
     try{
       let res;
