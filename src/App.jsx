@@ -33,14 +33,48 @@ export default function App() {
       : "https://kellybot-sdjn.onrender.com/ask";
 
     try{
-      const res = await axios.post(apiUrl, 
-        `prompt=${encodeURIComponent(currentPrompt)}`,
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+      let res;
+      if (window.location.hostname === 'localhost') {
+        // Development: use proxy
+        res = await axios.post(apiUrl, 
+          `prompt=${encodeURIComponent(currentPrompt)}`,
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            }
           }
+        );
+      } else {
+        // Production: use fetch with mode no-cors as fallback
+        try {
+          res = await axios.post(apiUrl, 
+            `prompt=${encodeURIComponent(currentPrompt)}`,
+            {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              }
+            }
+          );
+        } catch (corsError) {
+          // Fallback: use fetch with no-cors (won't get response data, but might work)
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `prompt=${encodeURIComponent(currentPrompt)}`
+          });
+          
+          // Since no-cors doesn't return data, show a message
+          const ai_msg = { 
+            role: "assistant", 
+            content: "Request sent successfully, but due to CORS limitations, I can't display the response. Please configure CORS on your backend to allow requests from https://kellybotfrontend.vercel.app" 
+          };
+          setMessages(prev => [...prev, ai_msg]);
+          return;
         }
-      );
+      }
       const ai_msg = { role:"assistant", content: res.data.response };
       setMessages(prev=>[...prev, ai_msg]);
     }catch(e){
