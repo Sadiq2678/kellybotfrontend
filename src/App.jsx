@@ -27,8 +27,13 @@ export default function App() {
     setPrompt("");
     setIsLoading(true);
 
+    // Use proxy in development, direct URL in production
+    const apiUrl = window.location.hostname === 'localhost' 
+      ? "/api/ask" 
+      : "https://kellybot-sdjn.onrender.com/ask";
+
     try{
-      const res = await axios.post("/api/ask", 
+      const res = await axios.post(apiUrl, 
         `prompt=${encodeURIComponent(currentPrompt)}`,
         {
           headers: {
